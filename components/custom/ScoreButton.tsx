@@ -5,11 +5,11 @@ export const ScoreButton = ({
   label,
   onClick,
 }: {
-  value: number;
+  value: number | string;
   label: string;
-  onClick: (score: number) => void;
+  onClick: (score: 1 | 2 | 3) => void;
 }) => {
-  const handleClick = (score: number) => {
+  const handleClick = (score: 1 | 2 | 3) => {
     onClick(score);
   };
 
@@ -22,7 +22,7 @@ export const ScoreButton = ({
         e.stopPropagation();
         handleClick(1);
       }}
-      className="w-full border border-gray-300 bg-white text-4xl text-black flex-col items-center justify-between relative hover:bg-gray-100 h-32 w-52"
+      className="border border-gray-300 bg-white text-4xl text-black flex-col items-center justify-between relative hover:bg-gray-100 h-32 w-52"
     >
       <span className="pt-4">{label}</span>
       <span
