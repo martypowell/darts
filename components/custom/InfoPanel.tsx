@@ -14,12 +14,12 @@ export default function Component({
   content?: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+    <Card className="p-1">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-1">
+        <CardTitle className="text-sm font-medium p-1">{title}</CardTitle>
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 py-0">
         {content ?? <div className="text-2xl font-bold">{total}</div>}
       </CardContent>
     </Card>

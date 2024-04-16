@@ -22,9 +22,9 @@ export const ScoreButton = ({
         e.stopPropagation();
         handleClick(1);
       }}
-      className="border border-gray-300 bg-white text-4xl text-black flex-col items-center justify-between relative hover:bg-gray-100 h-32 w-52"
+      className="border border-gray-300 bg-white text-4xl text-black flex-col items-center justify-between relative hover:bg-gray-100 h-28 w-48"
     >
-      <span className="pt-4">{label}</span>
+      <span className="pt-1">{label}</span>
       <span
         className={`flex ${
           label === "Bull" ? "justify-center" : "justify-between"

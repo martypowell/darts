@@ -98,7 +98,8 @@ export default function Home() {
       return acc + val.marks;
     }, 0);
   // marks per round is taking the total marks scored divided by the actual darts thrown, then multiplying it by 3
-  const marksPerRound = (totalMarksScored / info.dartCount) * 3;
+  const marksPerRound =
+    info.dartCount > 0 ? (totalMarksScored / info.dartCount) * 3 : 0;
 
   const handleScore = (target: CricketScore, dartScore: 1 | 2 | 3): void => {
     const newState = {
@@ -133,44 +134,57 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="">
-        <div className="grid grid-cols-2 gap-4">
-          <h1 className="text-3xl mb-4">Round: {roundNumber}</h1>
-          <ScoresSheet scores={info.scores.map((score) => score.label)} />
-        </div>
-        <div className="darts">
-          <div className="grid grid-cols-3 gap-4">
-            <InfoPanel title="Darts Thrown" total={info.dartCount} />
-            <InfoPanel title="Misses" total={info.misses} />
-            <InfoPanel
-              title="Marks Per Round"
-              total={marksPerRound.toFixed(2)}
-            />
-          </div>
+    <main className="flex min-h-screen flex-col items-center justify-between py-4 px-8">
+      <div className="darts">
+        <div className="grid grid-cols-7 gap-4">
+          <InfoPanel title="Round" total={roundNumber} />
+          <InfoPanel title="Darts Thrown" total={info.dartCount} />
+          <InfoPanel title="Misses" total={info.misses} />
+          <InfoPanel title="Marks Per Round" total={marksPerRound.toFixed(2)} />
+          <Button
+            type="button"
+            onClick={() => {
+              setInfo({
+                dartCount: info.dartCount + 1,
+                misses: info.misses + 1,
+                scores: [
+                  ...info.scores,
+                  {
+                    points: 0,
+                    label: "Miss",
+                    marks: 0,
+                  },
+                ],
+              });
+            }}
+          >
+            Miss
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              undoScore();
+              undoInfo();
+            }}
+          >
+            Undo
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              clearScore();
+              clearInfo();
+            }}
+          >
+            Start Over
+          </Button>
         </div>
       </div>
-      <Separator className="my-4" />
-      <div>
-        <Button
-          type="button"
-          onClick={() => {
-            setInfo({
-              dartCount: info.dartCount + 1,
-              misses: info.misses + 1,
-              scores: [
-                ...info.scores,
-                {
-                  points: 0,
-                  label: "Miss",
-                  marks: 0,
-                },
-              ],
-            });
-          }}
-        >
-          Miss
-        </Button>
+      <div className="">
+        <div className="grid grid-cols-2 gap-4">
+          {/* <h1 className="text-3xl mb-4">Round: {roundNumber}</h1> */}
+          {/* <ScoresSheet scores={info.scores.map((score) => score.label)} /> */}
+        </div>
       </div>
       <Separator className="my-4" />
       <div>
@@ -186,45 +200,6 @@ export default function Home() {
             <div className="mb-2"></div>
           </>
         ))}
-      </div>
-      <div className="flex justify-between w-full border-t border-gray-300 pt-4">
-        <Button
-          type="button"
-          onClick={() => {
-            clearScore();
-            clearInfo();
-          }}
-        >
-          Reset
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            setInfo({
-              dartCount: info.dartCount + 1,
-              misses: info.misses + 1,
-              scores: [
-                ...info.scores,
-                {
-                  points: 0,
-                  label: "Miss",
-                  marks: 0,
-                },
-              ],
-            });
-          }}
-        >
-          Miss
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            undoScore();
-            undoInfo();
-          }}
-        >
-          Undo
-        </Button>
       </div>
     </main>
   );
