@@ -1,112 +1,230 @@
-import Image from "next/image";
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useHistoryState } from "@uidotdev/usehooks";
+import InfoPanel from "@/components/custom/InfoPanel";
+import { BoardMarker } from "@/components/custom/BoardMarker";
+import { ScoresSheet } from "@/components/custom/ScoresSheet";
+import { CricketScore } from "@/common/scores";
+import { ScoreRow } from "@/components/custom/ScoreRow";
+
+const possibleScores = [
+  {
+    label: "20",
+    value: 20,
+  },
+  {
+    label: "19",
+    value: 19,
+  },
+  {
+    label: "18",
+    value: 18,
+  },
+  {
+    label: "17",
+    value: 17,
+  },
+  {
+    label: "16",
+    value: 16,
+  },
+  {
+    label: "15",
+    value: 15,
+  },
+  {
+    label: "Bull",
+    value: 25,
+  },
+] as { label: CricketScore; value: number }[];
+
+const getScoreLabel = (score: CricketScore, value: number) => {
+  if (score === "Bull") {
+    if (value === 1) {
+      return "SBull";
+    }
+    return "DBull";
+  } else if (value === 1) {
+    return `S${score}`;
+  } else if (value === 2) {
+    return `D${score}`;
+  } else if (value === 3) {
+    return `T${score}`;
+  }
+
+  return score;
+};
 
 export default function Home() {
+  //const { state, set, undo, redo, clear, canUndo, canRedo }
+  const {
+    state: score,
+    set: setScore,
+    undo: undoScore,
+    clear: clearScore,
+  } = useHistoryState<Record<CricketScore, number>>({
+    20: 0,
+    19: 0,
+    18: 0,
+    17: 0,
+    16: 0,
+    15: 0,
+    Bull: 0,
+  });
+  const {
+    state: info,
+    set: setInfo,
+    undo: undoInfo,
+    clear: clearInfo,
+  } = useHistoryState<{
+    dartCount: number;
+    misses: number;
+    scores: {
+      points: number;
+      label: string;
+      marks: number;
+    }[];
+  }>({
+    dartCount: 0,
+    misses: 0,
+    scores: [],
+  });
+  const roundNumber = Math.floor(info.dartCount / 3) + 1;
+  const totalMarksScored = info.scores
+    .filter(({ marks }) => marks > 0)
+    .reduce((acc, val) => {
+      return acc + val.marks;
+    }, 0);
+  // marks per round is taking the total marks scored divided by the actual darts thrown, then multiplying it by 3
+  const marksPerRound = (totalMarksScored / info.dartCount) * 3;
+
+  const handleScore = (target: CricketScore, dartScore: 1 | 2 | 3): void => {
+    const newState = {
+      ...score,
+      [target]: score[target] + dartScore,
+    };
+    setScore(newState);
+
+    // if newstate has all values of 3, then you have won, alert the user
+    if (Object.values(newState).every((value) => value >= 3)) {
+      alert("You have won!");
+    }
+
+    const dartCount = info.dartCount + 1;
+
+    // want to track each darts score
+    const dartPoints =
+      target === "Bull" ? 25 * dartScore : parseInt(target) * dartScore;
+
+    setInfo({
+      ...info,
+      dartCount,
+      scores: [
+        ...info.scores,
+        {
+          points: dartPoints,
+          label: getScoreLabel(target, dartScore),
+          marks: dartScore,
+        },
+      ],
+    });
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+      <div className="">
+        <div className="grid grid-cols-2 gap-4">
+          <h1 className="text-3xl mb-4">Round: {roundNumber}</h1>
+          <ScoresSheet scores={info.scores.map((score) => score.label)} />
+        </div>
+        <div className="darts">
+          <div className="grid grid-cols-3 gap-4">
+            <InfoPanel title="Darts Thrown" total={info.dartCount} />
+            <InfoPanel title="Misses" total={info.misses} />
+            <InfoPanel
+              title="Marks Per Round"
+              total={marksPerRound.toFixed(2)}
             />
-          </a>
+          </div>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <Separator className="my-4" />
+      <div>
+        <Button
+          type="button"
+          onClick={() => {
+            setInfo({
+              dartCount: info.dartCount + 1,
+              misses: info.misses + 1,
+              scores: [
+                ...info.scores,
+                {
+                  points: 0,
+                  label: "Miss",
+                  marks: 0,
+                },
+              ],
+            });
+          }}
+        >
+          Miss
+        </Button>
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+      <Separator className="my-4" />
+      <div>
+        {possibleScores.map((possibleScore) => (
+          <>
+            <ScoreRow
+              key={possibleScore.label}
+              target={possibleScore.label}
+              isClosed={score[possibleScore.label] >= 3}
+              onScore={handleScore}
+              score={score[possibleScore.label]}
+            />
+            <div className="mb-2"></div>
+          </>
+        ))}
+      </div>
+      <div className="flex justify-between w-full border-t border-gray-300 pt-4">
+        <Button
+          type="button"
+          onClick={() => {
+            clearScore();
+            clearInfo();
+          }}
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+          Reset
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            setInfo({
+              dartCount: info.dartCount + 1,
+              misses: info.misses + 1,
+              scores: [
+                ...info.scores,
+                {
+                  points: 0,
+                  label: "Miss",
+                  marks: 0,
+                },
+              ],
+            });
+          }}
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+          Miss
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            undoScore();
+            undoInfo();
+          }}
         >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+          Undo
+        </Button>
       </div>
     </main>
   );
