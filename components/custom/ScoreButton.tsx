@@ -14,44 +14,46 @@ export const ScoreButton = ({
   };
 
   return (
-    // tailwind button that is with a white background and a border of gray 300
-    // large button text that is the label
-    <Button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleClick(1);
-      }}
-      className="border border-gray-300 bg-white text-4xl text-black flex-col items-center justify-between relative hover:bg-gray-100 h-28 w-48"
-    >
-      <span className="pt-1">{label}</span>
-      <span
-        className={`flex ${
-          label === "Bull" ? "justify-center" : "justify-between"
-        } z-10 w-40`}
+    <div className="border border-gray-300 relative h-28 w-48">
+      <Button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClick(1);
+        }}
+        className="absolute bg-white text-4xl text-black hover:bg-gray-100 z-10 w-full h-full"
       >
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClick(2);
-          }}
-          className="bg-red-500 text-white hover:bg-red-600"
+        <span className="absolute top-1 pt-1">{label}</span>
+      </Button>
+      <div className="absolute bottom-1 l-0 r-0 w-full z-20">
+        <span
+          className={`flex ${
+            label === "Bull" ? "justify-center" : "justify-around"
+          }`}
         >
-          Double
-        </Button>
-        {label !== "Bull" && (
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              handleClick(3);
+              handleClick(2);
             }}
-            //  keep the default green for the triple button, but make the hover color slightly darker
-            className="bg-green-500 text-white hover:bg-green-600"
+            className="bg-red-500 text-white hover:bg-red-600"
           >
-            Triple
+            Double
           </Button>
-        )}
-      </span>
-    </Button>
+          {label !== "Bull" && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick(3);
+              }}
+              //  keep the default green for the triple button, but make the hover color slightly darker
+              className="bg-green-500 text-white hover:bg-green-600"
+            >
+              Triple
+            </Button>
+          )}
+        </span>
+      </div>
+    </div>
   );
 };

@@ -188,17 +188,17 @@ export default function Home() {
       </div>
       <Separator className="my-4" />
       <div>
-        {possibleScores.map((possibleScore) => (
-          <>
+        {possibleScores.map((possibleScore, index) => (
+          <div key={possibleScore.label}>
             <ScoreRow
-              key={possibleScore.label}
+              key={index}
               target={possibleScore.label}
               isClosed={score[possibleScore.label] >= 3}
               onScore={handleScore}
               score={score[possibleScore.label]}
             />
             <div className="mb-2"></div>
-          </>
+          </div>
         ))}
       </div>
     </main>
