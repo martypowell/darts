@@ -1,5 +1,4 @@
-import { TypographyH1 } from "@/components/ui/typography";
-
+import { TypographyH1 } from "@/components/custom/typography";
 import { ReactNode } from "react";
 
 type LayoutProps = {
